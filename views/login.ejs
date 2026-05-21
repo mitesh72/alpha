@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login</title>
+    <link rel="stylesheet" href="/style2.css" />
+</head>
+<body>
+  <div class="form-container">
+    <h2>Login</h2>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Name:</label>
+        <input type="text" id="username" placeholder="Enter your username" required />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" placeholder="Password" required />
+      </div>
+
+      <button type="submit" class="submit-btn">Login</button>
+    </form>
+
+    <p>Don't have an account? <a href="/signup">Signup</a></p>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || "Login failed");
+        return;
+      }
+
+      // Save userId for cart & other logic
+      localStorage.setItem("loggedUserId", data.userId);
+
+      // ✅ Save admin token if admin
+      if (data.adminToken) {
+        localStorage.setItem("adminToken", data.adminToken);
+        window.location.href = "/admin";
+      } else {
+        localStorage.removeItem("adminToken");
+        window.location.href = "/index.html";
+      }
+    });
+  </script>
+</body>
+</html>

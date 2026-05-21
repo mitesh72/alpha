@@ -1,0 +1,107 @@
+/* Admin Dashboard Layout */
+html, body {
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #f4f6f9;
+    font-family: Arial, sans-serif;
+}
+
+/* Header */
+.header {
+    width: 100%;
+    padding: 18px 30px;
+    background: #2c3e50;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logout-btn {
+    background: #e74c3c;
+    color: white;
+    padding: 8px 15px ;
+    margin-right: 70px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+/* Main container */
+.container {
+    display: flex;
+    padding: 20px;
+    gap: 30px;
+}
+
+/* Left form (Add product) */
+.form-section {
+    background: white;
+    padding: 20px;
+    width: 50%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #0002;
+}
+
+.form-section h2 {
+    margin-top: 0;
+}
+
+.form-section form input,
+.form-section form textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    background: #3498db;
+    color: white;
+    font-size: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Right product list panel */
+.products-section {
+    background: white;
+    padding: 20px;
+    width: 50%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #0002;
+}
+
+.product-list {
+    margin-top: 15px;
+}
+
+.product-card {
+    background: #ecf0f1;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Delete button */
+.delete-btn {
+    background: #c0392b;
+    padding: 8px 12px;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+

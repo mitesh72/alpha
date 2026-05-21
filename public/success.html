@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed — Desi Gabru</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .success-card {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+
+    /* Animated checkmark */
+    .check-circle {
+      width: 80px;
+      height: 80px;
+      background: #f5c542;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 36px;
+      animation: pop 0.5s ease;
+    }
+    @keyframes pop {
+      0%   { transform: scale(0); opacity: 0; }
+      70%  { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    h1 {
+      font-size: 26px;
+      color: #f5c542;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* Order details box */
+    .order-details {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .order-details h3 {
+      font-size: 13px;
+      color: #f5c542;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #222;
+      font-size: 13px;
+      gap: 12px;
+    }
+    .detail-row:last-child { border-bottom: none; }
+
+    .detail-label { color: #888; flex-shrink: 0; }
+    .detail-value { color: #eee; text-align: right; }
+
+    /* Products list */
+    .order-items {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .order-items h3 {
+      font-size: 13px;
+      color: #f5c542;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #222;
+      font-size: 13px;
+    }
+    .order-item:last-child { border-bottom: none; }
+
+    .order-item img {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #0d0d0d;
+    }
+
+    .item-info { flex: 1; }
+    .item-name { font-weight: 600; color: #eee; }
+    .item-qty  { color: #888; font-size: 11px; margin-top: 2px; }
+    .item-price { font-weight: bold; color: #f5c542; }
+
+    /* Loading state */
+    .loading-text {
+      color: #666;
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: #f5c542;
+      color: #000;
+      border: none;
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #e0b030; }
+
+    .btn-secondary {
+      background: transparent;
+      color: #f5c542;
+      border: 1px solid #f5c542;
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: #f5c542; color: #000; }
+
+    .brand {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #444;
+    }
+    .brand span { color: #f5c542; }
+  </style>
+</head>
+<body>
+
+<div class="success-card">
+
+  <div class="check-circle">✓</div>
+
+  <h1>Order Confirmed! 🎉</h1>
+  <p class="subtitle">
+    Thank you for shopping with Desi Gabru!<br>
+    Your order has been placed successfully. We'll deliver in <strong>3–5 business days</strong>.
+  </p>
+
+  <!-- Order Info -->
+  <div class="order-details">
+    <h3>📦 Order Details</h3>
+    <div class="detail-row">
+      <span class="detail-label">Order ID</span>
+      <span class="detail-value" id="order-id">Loading...</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Amount Paid</span>
+      <span class="detail-value" id="order-amount">—</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Deliver To</span>
+      <span class="detail-value" id="order-address">—</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Status</span>
+      <span class="detail-value" style="color:#2ecc71;">✅ Paid</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Delivery</span>
+      <span class="detail-value">3–5 Business Days</span>
+    </div>
+  </div>
+
+  <!-- Items Ordered -->
+  <div class="order-items">
+    <h3>🛍️ Items Ordered</h3>
+    <div id="items-list"><p class="loading-text">Loading items...</p></div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-group">
+    <a href="/index.html" class="btn-primary">Continue Shopping</a>
+    <a href="/bag.html" class="btn-secondary">View Cart</a>
+  </div>
+
+  <p class="brand">Desi Gabru — <span>Stay Alpha 🧔</span></p>
+
+</div>
+
+<script>
+(async function () {
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get("orderId");
+
+  if (!orderId) {
+    document.getElementById("order-id").textContent = "N/A";
+    document.getElementById("items-list").innerHTML = "<p class='loading-text'>No order info found.</p>";
+    return;
+  }
+
+  // Show short order ID
+  document.getElementById("order-id").textContent = "#" + orderId.slice(-8).toUpperCase();
+
+  try {
+    const userId = localStorage.getItem("loggedUserId");
+    const res = await fetch(`/api/orders/${userId}`);
+    const orders = await res.json();
+
+    // Find this specific order
+    const order = orders.find(o => o._id === orderId) || orders[0];
+
+    if (!order) {
+      document.getElementById("items-list").innerHTML = "<p class='loading-text'>Could not load order details.</p>";
+      return;
+    }
+
+    // Fill amount
+    document.getElementById("order-amount").textContent = `₹${order.amount}`;
+
+    // Fill address
+    if (order.shipping) {
+      const s = order.shipping;
+      document.getElementById("order-address").textContent =
+        `${s.name}, ${s.city}, ${s.state} — ${s.pincode}`;
+    }
+
+    // Fill items — fetch product details
+    const prodRes = await fetch("/api/products");
+    const allProducts = await prodRes.json();
+
+    const itemsHTML = order.items.map(item => {
+      const p = allProducts.find(x => x._id === item._id || x._id === item.productId);
+      if (!p) return "";
+      return `
+        <div class="order-item">
+          <img src="${p.image}" alt="${p.name}">
+          <div class="item-info">
+            <div class="item-name">${p.name}</div>
+            <div class="item-qty">Qty: ${item.qty}</div>
+          </div>
+          <div class="item-price">₹${p.price * item.qty}</div>
+        </div>
+      `;
+    }).join("");
+
+    document.getElementById("items-list").innerHTML = itemsHTML || "<p class='loading-text'>No items found.</p>";
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("items-list").innerHTML = "<p class='loading-text'>Could not load order details.</p>";
+  }
+})();
+</script>
+
+</body>
+</html>

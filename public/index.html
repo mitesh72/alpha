@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desi Gabru</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<!-- ============================================================ -->
+<!-- STEP 1: Replace your existing #ai-chatbot div with this     -->
+<!-- ============================================================ -->
+ 
+<div id="ai-chatbot">
+ 
+  <div id="chat-toggle" onclick="toggleChat()" title="Chat with Alpha Groom AI">
+    🧔
+    <span id="chat-badge" style="display:none">1</span>
+  </div>
+ 
+  <div id="chat-box">
+ 
+    <div id="chat-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:20px;">🤖</span>
+        <div>
+          <div style="font-size:14px;font-weight:bold;">CHAT BOTS</div>
+          <div style="font-size:11px;color:#f5c542;opacity:0.8;">● Online</div>
+        </div>
+      </div>
+      <span onclick="toggleChat()" style="cursor:pointer;font-size:18px;">✖</span>
+    </div>
+ 
+    <div id="quick-actions">
+      <button onclick="quickAsk('Best beard products?')">🧔 Beard</button>
+      <button onclick="quickAsk('Hair care products?')">💇 Hair</button>
+      <button onclick="quickAsk('Skincare routine?')">✨ Skin</button>
+      <button onclick="quickAsk('Best perfumes?')">🌸 Perfume</button>
+      <button onclick="quickAsk('Shipping info?')">🚚 Shipping</button>
+    </div>
+ 
+    <div id="chat-messages">
+      <!-- Welcome message shown on open -->
+    </div>
+ 
+    <div id="chat-typing" style="display:none;">
+      <span></span><span></span><span></span>
+    </div>
+ 
+    <div id="chat-input">
+      <input id="chat-text" placeholder="Ask about products, routines..." onkeydown="if(event.key==='Enter') sendMessage()" />
+      <button onclick="sendMessage()">➤</button>
+    </div>
+ 
+  </div>
+ 
+</div>
+ 
+<body> 
+    <header id="site-header"></header>
+<!-- ============================================================ -->
+<!-- STEP 2: Replace your existing chatbot <script> with this    -->
+<!-- ============================================================ -->
+ 
+<script>
+// Get userId from localStorage (set this when user logs in)
+const chatUserId = localStorage.getItem("userId") || null;
+let chatOpened = false;
+ 
+function toggleChat() {
+  const box = document.getElementById("chat-box");
+  const badge = document.getElementById("chat-badge");
+  const isOpen = box.style.display === "flex";
+ 
+  box.style.display = isOpen ? "none" : "flex";
+  badge.style.display = "none";
+ 
+  // Show welcome message on first open
+  if (!isOpen && !chatOpened) {
+    chatOpened = true;
+    appendBotMessage("👋 Hey! I'm **CHAT BOT** — your personal grooming expert.\n\nAsk me anything about our products, grooming tips, or your order. I'll recommend the best products from our store just for you! 🧔✨");
+  }
+}
+ 
+function quickAsk(text) {
+  document.getElementById("chat-text").value = text;
+  sendMessage();
+}
+ 
+async function sendMessage() {
+  const input = document.getElementById("chat-text");
+  const message = input.value.trim();
+  if (!message) return;
+ 
+  appendUserMessage(message);
+  input.value = "";
+ 
+  // Show typing indicator
+  showTyping(true);
+ 
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, userId: chatUserId })
+    });
+ 
+    const data = await res.json();
+    showTyping(false);
+    appendBotMessage(data.reply);
+ 
+  } catch (err) {
+    showTyping(false);
+    appendBotMessage("Sorry, I couldn't connect right now. Please try again! 😔");
+  }
+}
+ 
+function appendUserMessage(text) {
+  const chat = document.getElementById("chat-messages");
+  const div = document.createElement("div");
+  div.className = "user-msg";
+  div.textContent = text;
+  chat.appendChild(div);
+  scrollChat();
+}
+ 
+function appendBotMessage(text) {
+  const chat = document.getElementById("chat-messages");
+  const div = document.createElement("div");
+  div.className = "bot-msg";
+ 
+  // Render **bold** markdown and newlines
+  div.innerHTML = text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\n/g, "<br>");
+ 
+  chat.appendChild(div);
+  scrollChat();
+}
+ 
+function showTyping(show) {
+  document.getElementById("chat-typing").style.display = show ? "flex" : "none";
+  if (show) scrollChat();
+}
+ 
+function scrollChat() {
+  const chat = document.getElementById("chat-messages");
+  chat.scrollTop = chat.scrollHeight;
+}
+</script>
+ 
+<script>
+fetch("header.html")
+    .then(res => res.text())
+    .then(data => {
+        document.getElementById("site-header").innerHTML = data;
+
+        // After header is injected → update login UI
+        updateHeaderUI();
+
+        // Load index.js AFTER header + login check
+        const script = document.createElement("script");
+        script.src = "index.js?v=" + Date.now();
+        document.body.appendChild(script);
+    });
+
+function updateHeaderUI() {
+    const loggedUserId = localStorage.getItem("loggedUserId");
+
+    const loginLink = document.querySelector(".login-link");
+    const userBox = document.querySelector(".user-logged-in");
+
+    if (!loginLink || !userBox) {
+        console.warn("Header elements not found yet.");
+        return;
+    }
+
+    if (loggedUserId) {
+        loginLink.style.display = "none";
+        userBox.style.display = "flex";
+    } else {
+        loginLink.style.display = "flex";
+        userBox.style.display = "none";
+    }
+}
+
+</script>
+
+
+
+    <div class="bg">
+
+
+    <div class="hero-section1">
+        <div class="hero-section1-img">
+
+        </div>
+    </div>
+
+    <div class="hero-section2">
+        <div class="hero-sec2-heading">
+            <h1>Shop our range</h1>
+            
+        </div>
+        <div class="hero-sect-main">
+
+        </div>
+    </div>
+
+    <div class="hero-section3">
+        <div class="hero-sec3-heading">
+            <h1>Explore our collections</h1>
+        </div>
+        <div class="hero-sec3-content">
+            <div class="box border">
+                <div class="image border"></div>
+                <a href="beard.html" class="name border">Beard</a>
+                <i class="fa-solid fa-chevron-right border"></i>
+            </div>
+            <div class="box2 border">
+                <div class="image2 border"></div>
+                <a href="face.html" class="name border">Face</a>
+                <i class="fa-solid fa-chevron-right border"></i>
+            </div>
+            <div class="box3 border">
+                <div class="image3 border"></div>
+                <a href="hair.html" class="name border">Hair</a>
+                <i class="fa-solid fa-chevron-right border"></i>
+            </div>
+            <div class="box4 border">
+                <div class="image4 border"></div>
+                <a href="perfume.html" class="name border">Perfumes</a>
+                <i class="fa-solid fa-chevron-right border"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-section4">
+        <div class="hero-sec4-heading">
+            <h1>Our New Collection</h1>
+        </div>
+       <div class="hero-sec4-content">
+    <div id="products-container" class="products-grid"></div>
+</div>
+        </div>
+    </div>
+
+
+   
+   <footer class="footer">
+
+    <div class="footer-container">
+
+        <!-- Top Section -->
+        <div class="footer-grid">
+
+            <!-- About -->
+            <div class="footer-about">
+                <h3>About Us</h3>
+                <div class="underline"></div>
+                <p>
+                    Welcome to Desii Gabru — your destination for modern men's grooming.
+                    We craft premium products that help you look confident and feel your best,
+                    every single day.
+                </p>
+            </div>
+
+            <!-- Links -->
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <div class="underline"></div>
+
+                <div class="links-grid">
+                    <a href="#" onclick="openModal('about-modal')">About Us</a>
+                    <a href="#" onclick="openModal('return-modal')">Return Policy</a>
+                    <a href="#" onclick="openModal('terms-modal')">Terms & Conditions</a>
+                    <a href="#" onclick="openModal('privacy-modal')">Privacy Policy</a>
+                    <a href="#" onclick="openModal('shipping-modal')">Shipping Policy</a>
+                    <a href="/orders">My Orders</a>
+                    <a href="#" onclick="openModal('track-modal')">Track Your Order</a>
+                    <a href="#" onclick="openModal('contact-modal')">Contact Us</a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Contact -->
+        <div class="footer-contact">
+            <span>📞 +91 8076187683</span>
+            <span>✉️ DesiiGabruuOfficial@gmail.com</span>
+            <span>🕐 10 AM - 7 PM (Mon - Sat)</span>
+        </div>
+
+        <!-- Copyright -->
+        <div class="footer-bottom">
+            <p>© 2024 Desi Gabru. All rights reserved.</p>
+        </div>
+
+    </div>
+
+</footer>
+</div>
+
+<!-- ============================================================ -->
+<!--  FOOTER QUICK LINK MODALS                                    -->
+<!-- ============================================================ -->
+
+<!-- Overlay -->
+<div id="modal-overlay" onclick="closeModal()"></div>
+
+<!-- About Us -->
+<div class="fq-modal" id="about-modal">
+  <button class="fq-modal-close" onclick="closeModal()">&#x2715;</button>
+  <div class="fq-modal-icon">🧔</div>
+  <h2>About Us</h2>
+  <div class="fq-divider"></div>
+  <p>Welcome to <strong>Desii Gabru</strong> — your destination for modern men's grooming.</p>
+  <p>We craft premium, affordable grooming products tailored for the Indian man — from bold beard oils and hair wax to refreshing face washes and long-lasting perfumes. Every product is designed to help you look confident and feel your best, every single day.</p>
+  <p>Our mission is simple: bring professional-grade grooming within reach for every guy who takes pride in his appearance.</p>
+  <div class="fq-highlight">📍 Based in India &nbsp;|&nbsp; 🕐 Est. 2024 &nbsp;|&nbsp; 💯 100% Authentic</div>
+</div>
+
+<!-- Return Policy -->
+<div class="fq-modal" id="return-modal">
+  <button class="fq-modal-close" onclick="closeModal()">&#x2715;</button>
+  <div class="fq-modal-icon">🔄</div>
+  <h2>Return Policy</h2>
+  <div class="fq-divider"></div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">7 Days</span>
+    <p>Returns accepted within <strong>7 days</strong> of delivery for damaged or wrong items.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Condition</span>
+    <p>Product must be <strong>unused, sealed</strong>, and in original packaging.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Process</span>
+    <p>Email us at <strong>DesiiGabruuOfficial@gmail.com</strong> with your order ID and photos of the item.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Refund</span>
+    <p>Approved refunds are processed within <strong>5–7 business days</strong> to the original payment method.</p>
+  </div>
+  <div class="fq-policy-item fq-note">
+    <span>⚠️</span>
+    <p>Returns are <strong>not accepted</strong> for opened/used products or change-of-mind orders.</p>
+  </div>
+</div>
+
+<!-- Terms & Conditions -->
+<div class="fq-modal" id="terms-modal">
+  <button class="fq-modal-close" onclick="closeModal()">&#x2715;</button>
+  <div class="fq-modal-icon">📋</div>
+  <h2>Terms &amp; Conditions</h2>
+  <div class="fq-divider"></div>
+  <p>By using this website, you agree to the following terms:</p>
+  <ul class="fq-list">
+    <li>You must be 18 years or older to place an order.</li>
+    <li>All product information is provided in good faith; we are not liable for individual results.</li>
+    <li>Prices may change without prior notice. Orders are charged at the price displayed at checkout.</li>
+    <li>We reserve the right to cancel orders in cases of fraud, incorrect pricing, or stock issues.</li>
+    <li>Intellectual property — logos, images, and content — belong to Desi Gabru and may not be reused.</li>
+    <li>Desi Gabru is not responsible for delays caused by courier partners or unforeseen circumstances.</li>
+    <li>By creating an account, you consent to receiving order-related communications from us.</li>
+  </ul>
+  <p class="fq-small">Last updated: January 2024</p>
+</div>
+
+<!-- Privacy Policy -->
+<div class="fq-modal" id="privacy-modal">
+  <button class="fq-modal-close" onclick="closeModal()">&#x2715;</button>
+  <div class="fq-modal-icon">🔒</div>
+  <h2>Privacy Policy</h2>
+  <div class="fq-divider"></div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Data We Collect</span>
+    <p>Name, email, phone, shipping address, and payment details (processed securely via Razorpay).</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">How We Use It</span>
+    <p>To process orders, send delivery updates, and improve your shopping experience.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Third Parties</span>
+    <p>We do not sell your data. We share only what is necessary with courier and payment partners.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Cookies</span>
+    <p>We use cookies to keep you logged in and personalise your experience. You can disable them in your browser settings.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Your Rights</span>
+    <p>You can request deletion of your account data by emailing us at <strong>DesiiGabruuOfficial@gmail.com</strong>.</p>
+  </div>
+  <p class="fq-small">Last updated: January 2024</p>
+</div>
+
+<!-- Shipping Policy -->
+<div class="fq-modal" id="shipping-modal">
+  <button class="fq-modal-close" onclick="closeModal()">&#x2715;</button>
+  <div class="fq-modal-icon">🚚</div>
+  <h2>Shipping Policy</h2>
+  <div class="fq-divider"></div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Delivery Time</span>
+    <p>Orders are delivered within <strong>5–7 business days</strong> across India.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Processing</span>
+    <p>Orders are dispatched within <strong>1–2 business days</strong> after payment confirmation.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Shipping Fee</span>
+    <p>Free shipping on all orders above ₹499. A flat ₹49 fee applies on smaller orders.</p>
+  </div>
+  <div class="fq-policy-item">
+    <span class="fq-badge">Tracking</span>
+    <p>A tracking link will be sent to your registered email once your order is dispatched.</p>
+  </div>
+  <div class="fq-policy-item fq-note">
+    <span>⚠️</span>
+    <p>We currently ship within <strong>India only</strong>. Remote areas may take 1–2 extra days.</p>
+  </div>
+</div>
+
+<!-- Track Your Order -->
+<div class="fq-modal" id="track-modal">
+  <button class="fq-modal-close" onclick="closeModal()">&#x2715;</button>
+  <div class="fq-modal-icon">📦</div>
+  <h2>Track Your Order</h2>
+  <div class="fq-divider"></div>
+  <p>Enter your Order ID below to check your delivery status.</p>
+  <div class="fq-track-form">
+    <input type="text" id="track-order-input" placeholder="Enter Order ID (e.g. ORD-12345)" />
+    <button onclick="trackOrder()">Track</button>
+  </div>
+  <div id="track-result"></div>
+  <div class="fq-highlight" style="margin-top:20px;">
+    📧 You can also find your Order ID in the confirmation email sent after purchase.
+  </div>
+  <a href="/orders" class="fq-orders-link">View All My Orders →</a>
+</div>
+
+<!-- Contact Us -->
+<div class="fq-modal" id="contact-modal">
+  <button class="fq-modal-close" onclick="closeModal()">&#x2715;</button>
+  <div class="fq-modal-icon">💬</div>
+  <h2>Contact Us</h2>
+  <div class="fq-divider"></div>
+  <div class="fq-contact-grid">
+    <div class="fq-contact-card">
+      <span>📞</span>
+      <div>
+        <strong>Phone</strong>
+        <p>+91 8076187683</p>
+        <small>Mon – Sat, 10 AM – 7 PM</small>
+      </div>
+    </div>
+    <div class="fq-contact-card">
+      <span>✉️</span>
+      <div>
+        <strong>Email</strong>
+        <p>DesiiGabruuOfficial@gmail.com</p>
+        <small>Reply within 24 hours</small>
+      </div>
+    </div>
+    <div class="fq-contact-card">
+      <span>📍</span>
+      <div>
+        <strong>Location</strong>
+        <p>India</p>
+        <small>Shipping across all states</small>
+      </div>
+    </div>
+    <div class="fq-contact-card">
+      <span>🕐</span>
+      <div>
+        <strong>Support Hours</strong>
+        <p>10 AM – 7 PM</p>
+        <small>Monday to Saturday</small>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:18px;font-size:13px;color:#aaa;">For order issues, please include your <strong>Order ID</strong> in your message for faster resolution.</p>
+</div>
+
+<!-- ============================================================ -->
+<!--  MODAL STYLES                                                -->
+<!-- ============================================================ -->
+<style>
+#modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 9000;
+  backdrop-filter: blur(3px);
+}
+
+.fq-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  background: #1a1a1a;
+  color: #ccc;
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 14px;
+  padding: 36px 32px 30px;
+  width: 90%;
+  max-width: 540px;
+  max-height: 85vh;
+  overflow-y: auto;
+  z-index: 9100;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: #d4af37 #222;
+}
+
+.fq-modal.active {
+  display: block;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.fq-modal::-webkit-scrollbar { width: 5px; }
+.fq-modal::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 4px; }
+
+.fq-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.fq-modal-close:hover { color: #d4af37; }
+
+.fq-modal-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.fq-modal h2 {
+  font-size: 22px;
+  color: #fff;
+  margin: 0 0 6px;
+}
+
+.fq-divider {
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, #d4af37, #f5d76e);
+  margin-bottom: 18px;
+}
+
+.fq-modal p {
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  color: #bbb;
+}
+
+.fq-modal strong { color: #f0f0f0; }
+
+.fq-policy-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.fq-badge {
+  background: rgba(212,175,55,0.15);
+  color: #d4af37;
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.fq-policy-item p { margin: 0; }
+
+.fq-note {
+  background: rgba(255,180,0,0.07);
+  border-left: 3px solid #d4af37;
+  padding: 10px 12px;
+  border-radius: 0 8px 8px 0;
+  gap: 10px;
+  align-items: center;
+}
+.fq-note span { font-size: 18px; }
+
+.fq-highlight {
+  background: rgba(212,175,55,0.08);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #bbb;
+}
+
+.fq-list {
+  padding-left: 18px;
+  margin: 0 0 14px;
+}
+.fq-list li {
+  font-size: 13.5px;
+  color: #bbb;
+  line-height: 1.7;
+  margin-bottom: 6px;
+}
+
+.fq-small {
+  font-size: 12px;
+  color: #666;
+  margin-top: 16px;
+}
+
+/* Track form */
+.fq-track-form {
+  display: flex;
+  gap: 10px;
+  margin: 16px 0;
+}
+.fq-track-form input {
+  flex: 1;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s;
+}
+.fq-track-form input:focus { border-color: #d4af37; }
+.fq-track-form button {
+  background: linear-gradient(135deg, #d4af37, #f5d76e);
+  color: #111;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+.fq-track-form button:hover { opacity: 0.85; }
+
+#track-result {
+  font-size: 14px;
+  min-height: 20px;
+  color: #bbb;
+}
+#track-result.success { color: #4caf50; }
+#track-result.error   { color: #f44336; }
+
+.fq-orders-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: #d4af37;
+  font-size: 13px;
+  text-decoration: none;
+}
+.fq-orders-link:hover { text-decoration: underline; }
+
+/* Contact grid */
+.fq-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+@media (max-width: 480px) {
+  .fq-contact-grid { grid-template-columns: 1fr; }
+  .fq-modal { padding: 28px 20px 24px; }
+}
+.fq-contact-card {
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.fq-contact-card span { font-size: 22px; line-height: 1; }
+.fq-contact-card strong { color: #fff; font-size: 13px; display: block; margin-bottom: 3px; }
+.fq-contact-card p { margin: 0; font-size: 13px; color: #ccc; }
+.fq-contact-card small { font-size: 11px; color: #666; }
+</style>
+
+<!-- ============================================================ -->
+<!--  MODAL JAVASCRIPT                                            -->
+<!-- ============================================================ -->
+<script>
+function openModal(id) {
+  document.querySelectorAll('.fq-modal').forEach(m => m.classList.remove('active'));
+  document.getElementById('modal-overlay').style.display = 'block';
+  const modal = document.getElementById(id);
+  if (modal) {
+    modal.style.display = 'block';
+    requestAnimationFrame(() => modal.classList.add('active'));
+  }
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.querySelectorAll('.fq-modal').forEach(m => m.classList.remove('active'));
+  document.getElementById('modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+  document.getElementById('track-result').textContent = '';
+  document.getElementById('track-result').className = '';
+  if (document.getElementById('track-order-input'))
+    document.getElementById('track-order-input').value = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+async function trackOrder() {
+  const input = document.getElementById('track-order-input').value.trim();
+  const resultEl = document.getElementById('track-result');
+
+  if (!input) {
+    resultEl.textContent = 'Please enter an Order ID.';
+    resultEl.className = 'error';
+    return;
+  }
+
+  resultEl.textContent = 'Searching...';
+  resultEl.className = '';
+
+  try {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+    const res = await fetch('/orders/track?id=' + encodeURIComponent(input), { headers });
+    const data = await res.json();
+
+    if (data.success && data.order) {
+      const o = data.order;
+      resultEl.innerHTML = `
+        <div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:14px;margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <strong style="color:#fff;font-size:14px;">Order Found</strong>
+            <span style="background:rgba(76,175,80,0.15);color:#4caf50;border:1px solid rgba(76,175,80,0.3);border-radius:20px;padding:2px 10px;font-size:11px;">${o.status || 'Paid'}</span>
+          </div>
+          <p style="margin:4px 0;font-size:13px;color:#aaa;">📦 Items: <strong style="color:#ddd;">${o.items?.length || 0}</strong></p>
+          <p style="margin:4px 0;font-size:13px;color:#aaa;">💰 Amount: <strong style="color:#d4af37;">₹${o.amount}</strong></p>
+          <p style="margin:4px 0;font-size:13px;color:#aaa;">📅 Placed: <strong style="color:#ddd;">${new Date(o.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</strong></p>
+          ${o.shipping?.name ? `<p style="margin:4px 0;font-size:13px;color:#aaa;">🚚 Ship to: <strong style="color:#ddd;">${o.shipping.name}, ${o.shipping.city}</strong></p>` : ''}
+        </div>`;
+      resultEl.className = 'success';
+    } else {
+      resultEl.textContent = data.message || 'Order not found. Please check the ID and try again.';
+      resultEl.className = 'error';
+    }
+  } catch {
+    resultEl.textContent = 'Could not reach the server. Please try again.';
+    resultEl.className = 'error';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+ <link rel="stylesheet" href="style.css">
+     <link rel="stylesheet" href="bag.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+          
+</head>
+
+<body>
+
+ <header id="site-header"></header>
+
+<script>
+fetch("header.html")
+    .then(res => res.text())
+    .then(data => {
+        document.getElementById("site-header").innerHTML = data;
+
+        updateHeaderUI();
+
+        // STEP 1: Load index.js
+        const indexScript = document.createElement("script");
+        indexScript.src = "index.js?v=" + Date.now();
+
+        indexScript.onload = () => {
+
+            // STEP 2: Load bag.js AFTER index.js
+            const bagScript = document.createElement("script");
+            bagScript.src = "bag.js?v=" + Date.now();
+
+            bagScript.onload = () => {
+                // STEP 3: Run loadBagPage only AFTER bag.js is fully loaded
+                if (typeof loadBagPage === "function") {
+                    loadBagPage();
+                }
+            };
+
+            document.body.appendChild(bagScript);
+        };
+
+        document.body.appendChild(indexScript);
+    });
+
+function updateHeaderUI() {
+    const loggedUserId = localStorage.getItem("loggedUserId");
+
+    const loginLink = document.querySelector(".login-link");
+    const userBox = document.querySelector(".user-logged-in");
+
+    if (!loginLink || !userBox) return;
+
+    if (loggedUserId) {
+        loginLink.style.display = "none";
+        userBox.style.display = "flex";
+    } else {
+        loginLink.style.display = "flex";
+        userBox.style.display = "none";
+    }
+}
+</script>
+ <main>
+    <div class="hero-section-heading">
+        <h1>YOUR CART</h1>
+    </div>
+
+    <div class="parent-main-cart-summary">
+
+        <!-- CART ITEMS -->
+        <div class="cart-summary">
+            
+            <div class="cart-summary-head">
+    <div class="cart-col product-col">Product</div>
+    <div class="cart-col price-col">Price</div>
+    <div class="cart-col qty-col">Qty</div>
+    <div class="cart-col total-col">Total</div>
+</div>
+
+            <div class="main-cart-summary"></div>
+        </div>
+
+        <!-- ORDER SUMMARY -->
+        <div class="order-summary"></div>
+
+    </div>
+</main>
+
+<!-- ONLY LOAD bag.js -->
+
+
+</body>
+</html>

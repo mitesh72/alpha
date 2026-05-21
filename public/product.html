@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+/* Product page styling */
+.product-page-container { max-width: 1200px; margin: 20px auto; padding: 10px; }
+.product-detail-card { display: flex; gap: 40px; flex-wrap: wrap; }
+.product-images { flex: 1; min-width: 300px; }
+.product-images img { width: 100%; border-radius: 8px; }
+.product-thumbnails { display: flex; gap: 10px; margin-top: 10px; }
+.product-thumbnails img { width: 60px; height: 60px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
+.product-detail-info { flex: 1; min-width: 300px; }
+.product-detail-info h1 { margin-top: 0; }
+.old-price { text-decoration: line-through; color: gray; }
+.stars { color: gold; }
+.recommended-products { margin-top: 50px; }
+.recommended-products h2 { margin-bottom: 20px; }
+.recommended-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+.items-container { width: 200px; cursor: pointer; border: 1px solid #eee; padding: 10px; border-radius: 8px; transition: 0.2s; }
+.items-container:hover { box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+.img-box { position: relative; }
+.img-box img { width: 100%; border-radius: 8px; }
+.badge { position: absolute; top: 5px; left: 5px; background: red; color: #fff; padding: 2px 5px; font-size: 12px; border-radius: 4px; }
+.product-content { text-align: center; margin-top: 10px; }
+.product-name { font-weight: bold; }
+.price { margin-top: 5px; }
+.add { margin-top: 5px; padding: 5px 10px; background: #000; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
+.add:hover { background: #444; }
+</style>
+</head>
+<body>
+
+<header id="site-header"></header>
+
+<div class="product-page-container">
+  <div id="product-details">
+    <div class="skeleton-product">
+      <div class="skeleton-product-img"></div>
+      <div class="skeleton-product-info">
+        <div class="skeleton-line" style="width:60%;height:28px;"></div>
+        <div class="skeleton-line" style="width:30%;height:20px;margin-top:4px;"></div>
+        <div class="skeleton-line" style="width:80%;height:14px;margin-top:10px;"></div>
+        <div class="skeleton-line" style="width:70%;height:14px;"></div>
+        <div class="skeleton-line" style="width:50%;height:14px;"></div>
+        <div class="skeleton-line" style="width:40%;height:40px;margin-top:20px;border-radius:8px;"></div>
+      </div>
+    </div>
+  </div>
+  <div id="recommended-section"></div>
+</div>
+
+<script>
+// Load header
+fetch("header.html").then(res => res.text()).then(data => {
+    document.getElementById("site-header").innerHTML = data;
+});
+</script>
+
+<script>
+(async function() {
+  const container = document.getElementById('product-details');
+  const recContainer = document.getElementById('recommended-section');
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get('id');
+
+  if (!productId) { container.innerHTML = "<p>Invalid product ID.</p>"; return; }
+
+  try {
+    // Fetch main product
+    const res = await fetch(`/api/products/${productId}`);
+    if (!res.ok) throw new Error("Product not found");
+    const product = await res.json();
+
+    // Fetch all products
+    const allRes = await fetch(`/api/products`);
+    const allProducts = await allRes.json();
+
+    // Keywords mapping
+    const categoryKeywords = {
+      beard: ["beard","oil","shiner","balm"],
+      hair: ["hair","oil","serum","cream"],
+      face: ["face","wash","serum","cream"],
+      perfume: ["perfume","fragrance","scent"]
+    };
+
+    const productCategory = (product.category || product.Category || "other").toLowerCase();
+    const keywords = categoryKeywords[productCategory] || [productCategory];
+
+    // Recommended products
+    let recommended = allProducts
+      .filter(p => p._id !== product._id &&
+        (keywords.some(k => p.name.toLowerCase().includes(k)) ||
+         keywords.some(k => (p.category || p.Category || "").toLowerCase().includes(k)))
+      )
+      .slice(0, 5);
+
+    // Fallback if less than 5
+    if (recommended.length < 5) {
+      const additional = allProducts
+        .filter(p => p._id !== product._id && !recommended.includes(p))
+        .slice(0, 5 - recommended.length);
+      recommended = recommended.concat(additional);
+    }
+
+    // Display main product
+    container.innerHTML = `
+      <div class="product-detail-card">
+        <div class="product-images">
+          <img id="main-image" src="${product.image}" alt="${product.name}">
+          <div class="product-thumbnails">
+            <img src="${product.image}" alt="Thumbnail 1">
+          </div>
+        </div>
+        <div class="product-detail-info">
+          <h1>${product.name}</h1>
+          <div class="stars">${"★".repeat(Math.floor(product.rating||4)) + "☆".repeat(5-Math.floor(product.rating||4))} (${product.reviews||0} reviews)</div>
+          <p>${product.description || "No description available."}</p>
+          <p><strong>Price: ₹${product.price}</strong></p>
+          ${product.old_price ? `<p class="old-price">Old Price: ₹${product.old_price}</p>` : ""}
+          <button id="add-to-cart-btn">Add to Cart</button>
+        </div>
+      </div>
+    `;
+
+    // Quick Add for main product
+    document.getElementById("add-to-cart-btn").addEventListener("click", async () => {
+      const userId = localStorage.getItem("loggedUserId");
+      if (!userId) { alert("Please login"); window.location.href="/login"; return; }
+      try {
+        await fetch("/api/cart/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, items:[{ productId: product._id, qty:1 }] })
+        });
+        alert("Product added to cart!");
+      } catch(e){ console.error(e); alert("Failed to add to cart"); }
+    });
+
+    // Thumbnail click changes main image
+    document.querySelectorAll(".product-thumbnails img").forEach(img => {
+      img.addEventListener("click", () => { document.getElementById("main-image").src = img.src; });
+    });
+
+    // Function to create product card
+    function createProductCard(p) {
+      const discount = p.old_price ? Math.round((1 - p.price/p.old_price)*100) : null;
+      const stars = "★".repeat(Math.floor(p.rating||4)) + "☆".repeat(5-Math.floor(p.rating||4));
+      return `
+        <div class="items-container">
+          <div class="img-box">
+            <img src="${p.image}" alt="${p.name}" class="item-image">
+            ${discount ? `<span class="badge">${discount}% OFF</span>` : ""}
+          </div>
+          <div class="product-content">
+            <div class="product-name">${p.name}</div>
+            <div class="rating"><div class="stars">${stars}</div><span class="reviews">(${p.reviews||0})</span></div>
+            <div class="price"><span class="new">₹${p.price}</span>${p.old_price ? `<span class="old">₹${p.old_price}</span>` : ""}</div>
+            <button class="add" onclick="addToBag('${p._id}', event)">QUICK ADD</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Display recommended products
+    recContainer.innerHTML = `
+      <div class="recommended-products">
+        <h2>Recommended ${productCategory.charAt(0).toUpperCase() + productCategory.slice(1)} Products</h2>
+        <div class="recommended-grid">
+          ${recommended.map(p => createProductCard(p)).join("")}
+        </div>
+      </div>
+    `;
+
+    // Quick Add for recommended products
+    window.addToBag = async function(itemId, event) {
+      event.stopPropagation();
+      const userId = localStorage.getItem("loggedUserId");
+      if (!userId) { alert("Please login"); window.location.href="/login"; return; }
+      try {
+        await fetch("/api/cart/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, items:[{ productId: itemId, qty:1 }] })
+        });
+        alert("Product added to cart!");
+      } catch(e){ console.error(e); alert("Failed to add to cart"); }
+    }
+
+    // Make recommended cards clickable
+    document.querySelectorAll(".items-container").forEach(card => {
+      card.addEventListener("click", () => {
+        const id = card.querySelector(".add")?.getAttribute("onclick")?.match(/'(.+?)'/)[1];
+        if (id) window.location.href = `product.html?id=${id}`;
+      });
+    });
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "<p>Product not found or error loading product.</p>";
+  }
+})();
+</script>
+
+</body>
+</html>

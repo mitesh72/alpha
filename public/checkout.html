@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="checkout.css">
+</head>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="checkout.js"></script>
+<body>
+
+<header>
+    <h1 class="checkout-title">CHECKOUT</h1>
+</header>
+
+<div class="checkout-container">
+
+    <!-- LEFT: SHIPPING FORM -->
+    <div class="checkout-left">
+
+        <h2>Shipping Details</h2>
+
+        <form class="shipping-form">
+            <label>Full Name</label>
+            <input type="text" placeholder="Enter your name">
+
+            <label>Phone</label>
+            <input type="text" placeholder="Enter phone number">
+
+            <label>Email</label>
+            <input type="email" placeholder="Enter email">
+
+            <label>Address</label>
+            <textarea placeholder="Enter address"></textarea>
+
+            <label>Pincode</label>
+            <input type="text" placeholder="Enter pincode">
+
+            <label>City</label>
+            <input type="text" placeholder="Enter city">
+
+            <label>State</label>
+            <input type="text" placeholder="Enter state">
+        </form>
+    </div>
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <div class="checkout-right">
+
+        <h2>Order Summary</h2>
+
+        <div class="checkout-products"></div>
+
+        <div class="checkout-totals">
+            <p>Subtotal: <span class="subtotal">Rs. 0</span></p>
+            <p>Discount: <span class="discount">Rs. 0</span></p>
+            <p><strong>Total: <span class="total">Rs. 0</span></strong></p>
+        </div>
+<h3>Payment Method</h3>
+
+    <div class="payment-methods">
+        <label class="payment-option">
+            <input type="radio" name="payment" value="cod" checked>
+            <span>Cash on Delivery (COD)</span>
+        </label>
+        <label class="payment-option">
+            <input type="radio" name="payment" value="online">
+            <span>Online Payment (UPI / Card / Net Banking)</span>
+        </label>
+    </div>
+       <button type="button" class="place-order-btn">
+    PLACE ORDER
+</button>
+
+    </div>
+
+</div>
+
+
+
+</body>
+</html>

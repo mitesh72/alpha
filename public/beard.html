@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hair Products</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body style="background-color: grey;">
+ <header id="site-header"></header>
+
+<script>
+fetch("header.html")
+    .then(res => res.text())
+    .then(data => {
+        document.getElementById("site-header").innerHTML = data;
+
+        // After header is injected → update login UI
+        updateHeaderUI();
+
+        // Load index.js AFTER header + login check
+        const script = document.createElement("script");
+        script.src = "index.js?v=" + Date.now();
+        document.body.appendChild(script);
+    });
+
+function updateHeaderUI() {
+    const loggedUserId = localStorage.getItem("loggedUserId");
+
+    const loginLink = document.querySelector(".login-link");
+    const userBox = document.querySelector(".user-logged-in");
+
+    if (!loginLink || !userBox) {
+        console.warn("Header elements not found yet.");
+        return;
+    }
+
+    if (loggedUserId) {
+        loginLink.style.display = "none";
+        userBox.style.display = "flex";
+    } else {
+        loginLink.style.display = "flex";
+        userBox.style.display = "none";
+    }
+}
+</script>
+
+
+
+
+<h1 style="text-align:center; margin:20px;">Beard Products</h1>
+
+<div class="category-products"></div>
+
+<script src="category.js"></script>
+<script>
+loadCategoryProducts(["beard"]);
+</script>
+
+</body>
+</html>

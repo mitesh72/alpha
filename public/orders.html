@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders — Desi Gabru</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous">
+  <style>
+    body { background: #0a0a0a; color: #eee; }
+
+    .orders-wrapper {
+      max-width: 860px;
+      margin: 30px auto;
+      padding: 0 16px 60px;
+    }
+
+    .orders-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #f5c542;
+      margin-bottom: 6px;
+    }
+
+    .orders-subtitle {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    /* Empty state */
+    .empty-orders {
+      text-align: center;
+      padding: 80px 20px;
+      color: #555;
+    }
+    .empty-orders i {
+      font-size: 50px;
+      margin-bottom: 16px;
+      display: block;
+      color: #333;
+    }
+    .empty-orders h3 { color: #888; margin-bottom: 8px; }
+    .empty-orders a {
+      display: inline-block;
+      margin-top: 16px;
+      background: #f5c542;
+      color: #000;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    /* Order card */
+    .order-card {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .order-card:hover { border-color: #f5c542; }
+
+    .order-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 16px 20px;
+      background: #0d0d0d;
+      border-bottom: 1px solid #1e1e1e;
+      cursor: pointer;
+    }
+
+    .order-meta { display: flex; flex-direction: column; gap: 3px; }
+    .order-id { font-size: 13px; font-weight: bold; color: #f5c542; }
+    .order-date { font-size: 12px; color: #666; }
+
+    .order-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+    .order-amount {
+      font-size: 16px;
+      font-weight: bold;
+      color: #eee;
+    }
+
+    .order-status {
+      font-size: 11px;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-paid     { background: #1a3a2a; color: #2ecc71; border: 1px solid #2ecc7150; }
+    .status-shipped  { background: #1a2a3a; color: #3498db; border: 1px solid #3498db50; }
+    .status-delivered{ background: #2a2a1a; color: #f5c542; border: 1px solid #f5c54250; }
+    .status-pending  { background: #2a1a1a; color: #e74c3c; border: 1px solid #e74c3c50; }
+
+    .toggle-icon { color: #666; font-size: 13px; transition: transform 0.3s; }
+    .order-card.open .toggle-icon { transform: rotate(180deg); }
+
+    /* Order body (expandable) */
+    .order-card-body {
+      display: none;
+      padding: 16px 20px;
+    }
+    .order-card.open .order-card-body { display: block; }
+
+    /* Items list */
+    .order-items-list { margin-bottom: 16px; }
+
+    .order-item-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid #1e1e1e;
+    }
+    .order-item-row:last-child { border-bottom: none; }
+
+    .order-item-row img {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #0d0d0d;
+      flex-shrink: 0;
+    }
+    .order-item-info { flex: 1; }
+    .order-item-name { font-size: 13px; font-weight: 600; color: #eee; }
+    .order-item-qty  { font-size: 12px; color: #888; margin-top: 2px; }
+    .order-item-price{ font-size: 13px; font-weight: bold; color: #f5c542; flex-shrink: 0; }
+
+    /* Shipping info */
+    .shipping-info {
+      background: #1a1a1a;
+      border: 1px solid #222;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.8;
+    }
+    .shipping-info strong { color: #eee; }
+
+    /* Totals row */
+    .order-totals {
+      display: flex;
+      justify-content: flex-end;
+      gap: 30px;
+      padding-top: 14px;
+      border-top: 1px solid #1e1e1e;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #888;
+    }
+    .order-totals .total-val {
+      font-size: 15px;
+      font-weight: bold;
+      color: #f5c542;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 8px;
+      height: 80px;
+      margin-bottom: 16px;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="site-header"></header>
+
+<script>
+fetch("header.html").then(r => r.text()).then(html => {
+  document.getElementById("site-header").innerHTML = html;
+  const userId = localStorage.getItem("loggedUserId");
+  const loginLink = document.querySelector(".login-link");
+  const userBox   = document.querySelector(".user-logged-in");
+  if (loginLink && userBox) {
+    if (userId) { loginLink.style.display = "none"; userBox.style.display = "flex"; }
+    else        { loginLink.style.display = "flex";  userBox.style.display = "none"; }
+  }
+});
+</script>
+
+<div class="orders-wrapper">
+  <div class="orders-title">📦 My Orders</div>
+  <div class="orders-subtitle">All your past purchases in one place</div>
+  <div id="orders-container">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+</div>
+
+<script>
+(async function loadOrders() {
+  const userId = localStorage.getItem("loggedUserId");
+  const container = document.getElementById("orders-container");
+
+  if (!userId) {
+    container.innerHTML = `
+      <div class="empty-orders">
+        <i class="fa-solid fa-lock"></i>
+        <h3>Please login to view your orders</h3>
+        <a href="/login">Login</a>
+      </div>`;
+    return;
+  }
+
+  try {
+    const [ordersRes, productsRes] = await Promise.all([
+      fetch(`/api/orders/${userId}`),
+      fetch("/api/products")
+    ]);
+
+    const orders   = await ordersRes.json();
+    const products = await productsRes.json();
+
+    if (!orders.length) {
+      container.innerHTML = `
+        <div class="empty-orders">
+          <i class="fa-solid fa-box-open"></i>
+          <h3>No orders yet</h3>
+          <p>Looks like you haven't placed any orders.</p>
+          <a href="/index.html">Start Shopping</a>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = orders.map((order, idx) => {
+      const date = new Date(order.createdAt).toLocaleDateString("en-IN", {
+        day: "numeric", month: "short", year: "numeric"
+      });
+
+      const statusClass = {
+        "Paid":      "status-paid",
+        "Shipped":   "status-shipped",
+        "Delivered": "status-delivered",
+        "Pending":   "status-pending"
+      }[order.status] || "status-paid";
+
+      // Build items rows
+      const itemsHTML = (order.items || []).map(item => {
+        const p = products.find(x => x._id === (item._id || item.productId));
+        if (!p) return "";
+        return `
+          <div class="order-item-row">
+            <img src="${p.image}" alt="${p.name}">
+            <div class="order-item-info">
+              <div class="order-item-name">${p.name}</div>
+              <div class="order-item-qty">Qty: ${item.qty}</div>
+            </div>
+            <div class="order-item-price">₹${p.price * item.qty}</div>
+          </div>`;
+      }).join("");
+
+      // Shipping info
+      const s = order.shipping || {};
+      const shippingHTML = s.name ? `
+        <div class="shipping-info">
+          <strong>Delivering to:</strong><br>
+          ${s.name} &nbsp;|&nbsp; ${s.phone}
+          ${s.email ? `&nbsp;|&nbsp; ${s.email}` : ""}
+          <br>${s.address}, ${s.city}, ${s.state} — ${s.pincode}
+        </div>` : "";
+
+      return `
+        <div class="order-card" id="order-${idx}">
+          <div class="order-card-header" onclick="toggleOrder('order-${idx}')">
+            <div class="order-meta">
+              <span class="order-id">#${order._id.slice(-8).toUpperCase()}</span>
+              <span class="order-date">${date}</span>
+            </div>
+            <div class="order-right">
+              <span class="order-amount">₹${order.amount}</span>
+              <span class="order-status ${statusClass}">${order.status}</span>
+              <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+          </div>
+          <div class="order-card-body">
+            <div class="order-items-list">${itemsHTML || "<p style='color:#666'>No item details available</p>"}</div>
+            ${shippingHTML}
+            <div class="order-totals">
+              <span>Total Paid: <span class="total-val">₹${order.amount}</span></span>
+            </div>
+          </div>
+        </div>`;
+    }).join("");
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<p style="color:#e74c3c;text-align:center;">Failed to load orders. Please try again.</p>`;
+  }
+})();
+
+function toggleOrder(id) {
+  document.getElementById(id).classList.toggle("open");
+}
+</script>
+
+</body>
+</html>

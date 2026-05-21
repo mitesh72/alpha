@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css">
+
+  <style>
+    /* ── TAB NAV ── */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      background: #2c3e50;
+      padding: 0 30px;
+    }
+    .tab-nav button {
+      background: transparent;
+      color: #aaa;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
+    }
+    .tab-nav button.active {
+      color: #fff;
+      border-bottom: 3px solid #f5c542;
+    }
+    .tab-nav button:hover { color: #fff; }
+
+    /* ── PANELS ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── DASHBOARD STATS ── */
+    .stats-grid {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px 28px;
+      box-shadow: 0 0 10px #0002;
+      flex: 1;
+      min-width: 160px;
+    }
+    .stat-label { font-size: 12px; color: #888; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: bold; color: #2c3e50; }
+    .stat-card.gold .stat-value { color: #c49a2a; }
+    .stat-card.green .stat-value { color: #27ae60; }
+    .stat-card.blue .stat-value { color: #2980b9; }
+    .stat-card.orange .stat-value { color: #e67e22; }
+
+    /* ── TOP PRODUCTS TABLE ── */
+    .top-section {
+      background: white;
+      margin: 0 20px 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #0002;
+      overflow: hidden;
+    }
+    .top-section h3 {
+      margin: 0;
+      padding: 14px 18px;
+      font-size: 15px;
+      background: #ecf0f1;
+      border-bottom: 1px solid #ddd;
+    }
+    .top-table { width: 100%; border-collapse: collapse; }
+    .top-table th { background: #f8f9fa; padding: 10px 16px; text-align: left; font-size: 12px; color: #888; text-transform: uppercase; border-bottom: 1px solid #eee; }
+    .top-table td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    .top-table tr:last-child td { border-bottom: none; }
+    .top-table img { width: 36px; height: 36px; object-fit: cover; border-radius: 6px; vertical-align: middle; margin-right: 10px; }
+
+    /* ── ORDERS TABLE ── */
+    .orders-section {
+      background: white;
+      margin: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #0002;
+      overflow: hidden;
+    }
+    .orders-section h2 {
+      margin: 0;
+      padding: 16px 20px;
+      font-size: 16px;
+      background: #ecf0f1;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .orders-section h2 span { font-size: 13px; color: #888; font-weight: normal; }
+
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      padding: 12px 20px;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+    .filter-bar input, .filter-bar select {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .filter-bar input { flex: 1; min-width: 200px; }
+
+    .orders-table { width: 100%; border-collapse: collapse; }
+    .orders-table th {
+      background: #f8f9fa;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      border-bottom: 1px solid #eee;
+    }
+    .orders-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+    .orders-table tr:last-child td { border-bottom: none; }
+    .orders-table tr:hover td { background: #fafafa; }
+
+    .order-id { font-family: monospace; font-size: 12px; color: #888; }
+    .customer-phone { font-size: 12px; color: #888; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .badge.Paid      { background: #d6eaf8; color: #2980b9; }
+    .badge.Shipped   { background: #fdebd0; color: #e67e22; }
+    .badge.Delivered { background: #d5f5e3; color: #27ae60; }
+    .badge.Cancelled { background: #fadbd8; color: #c0392b; }
+
+    .status-select {
+      padding: 5px 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .update-btn {
+      background: #2c3e50;
+      color: white;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .update-btn:hover { background: #1a252f; }
+
+    .expand-btn {
+      background: #ecf0f1;
+      color: #555;
+      border: 1px solid #ccc;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .expand-btn:hover { background: #dce0e3; }
+
+    .order-items-row { display: none; }
+    .order-items-row.open { display: table-row; }
+    .order-items-inner {
+      background: #f8f9fa;
+      padding: 14px 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .item-chip {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .item-chip img { width: 34px; height: 34px; object-fit: cover; border-radius: 5px; }
+    .item-chip-name { font-weight: bold; }
+    .item-chip-meta { color: #888; font-size: 12px; }
+    .address-chip {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .address-chip .chip-label { font-size: 11px; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 12px 20px; background: #27ae60; color: white;
+      border-radius: 8px; font-size: 14px; font-weight: bold;
+      opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 999;
+    }
+    #toast.show { opacity: 1; }
+    #toast.error { background: #c0392b; }
+
+    .loading { padding: 30px; text-align: center; color: #888; }
+    .table-wrap { overflow-x: auto; }
+
+    /* ── EDIT PRODUCT ── */
+    .edit-btn {
+      background: #2980b9;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      margin-right: 6px;
+    }
+    .edit-btn:hover { background: #1f6391; }
+    .edit-form-row {
+      display: none;
+      background: #f0f4f8;
+      border: 1px solid #d0d8e0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 8px;
+    }
+    .edit-form-row.open { display: block; }
+    .edit-form-row input,
+    .edit-form-row textarea {
+      width: 100%;
+      padding: 8px 10px;
+      margin: 5px 0 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+    .edit-form-row label { font-size: 12px; color: #666; font-weight: bold; }
+    .edit-save-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    .edit-save-btn:hover { background: #1e8449; }
+    .edit-cancel-btn {
+      background: #ecf0f1;
+      color: #555;
+      border: 1px solid #ccc;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    Admin Dashboard
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+  </div>
+
+  <!-- TAB NAV -->
+  <div class="tab-nav">
+    <button class="active" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+    <button onclick="switchTab('orders', this)">📦 Orders</button>
+    <button onclick="switchTab('products', this)">🛍️ Products</button>
+  </div>
+
+  <!-- ── DASHBOARD ── -->
+  <div class="tab-panel active" id="tab-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card gold">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value" id="statRevenue">—</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value" id="statOrders">—</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Orders Today</div>
+        <div class="stat-value" id="statToday">—</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-label">Unshipped</div>
+        <div class="stat-value" id="statPending">—</div>
+      </div>
+    </div>
+
+    <div class="top-section">
+      <h3>🔥 Top Products by Revenue</h3>
+      <table class="top-table">
+        <thead>
+          <tr><th>#</th><th>Product</th><th>Units Sold</th><th>Revenue</th></tr>
+        </thead>
+        <tbody id="topProductsBody">
+          <tr><td colspan="4" class="loading">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── ORDERS ── -->
+  <div class="tab-panel" id="tab-orders">
+    <div class="orders-section">
+      <h2>All Orders <span id="orderCount"></span></h2>
+      <div class="filter-bar">
+        <input type="text" id="orderSearch" placeholder="Search name, phone, order ID…" oninput="filterOrders()">
+        <select id="statusFilter" onchange="filterOrders()">
+          <option value="">All Statuses</option>
+          <option value="Paid">Paid</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Update Status</th>
+              <th>Items</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="7" class="loading">Loading orders…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PRODUCTS ── -->
+  <div class="tab-panel" id="tab-products">
+    <div class="container">
+
+      <div class="form-section">
+        <h2>Add Product</h2>
+        <form id="addProductForm" enctype="multipart/form-data">
+          <input type="text" name="name" placeholder="Product Name" required>
+          <input type="number" name="price" placeholder="Price" required>
+          <input type="number" name="old_price" placeholder="Old Price (optional)">
+          <textarea name="description" placeholder="Description"></textarea>
+          <input type="file" name="image" accept="image/*" required>
+          <button type="submit">Add Product</button>
+        </form>
+      </div>
+
+      <div class="products-section">
+        <h2>All Products <span id="productCount" style="font-size:13px;color:#888;font-weight:normal;"></span></h2>
+        <div id="productList" class="product-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+<script>
+let allOrders = [];
+
+(async function checkAdmin() {
+  const token = localStorage.getItem("adminToken");
+  if (!token) { window.location.href = "/login"; return; }
+  try {
+    const res = await fetch("/admin/api/verify", { headers: { "x-admin-token": token } });
+    const d = await res.json();
+    if (!d.success) { localStorage.removeItem("adminToken"); window.location.href = "/login"; }
+  } catch { window.location.href = "/login"; }
+})();
+
+function adminFetch(url, opts = {}) {
+  const token = localStorage.getItem("adminToken");
+  opts.headers = { ...(opts.headers || {}), "x-admin-token": token };
+  return fetch(url, opts);
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-nav button").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  btn.classList.add("active");
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "show" + (isError ? " error" : "");
+  setTimeout(() => t.className = "", 3000);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadOrders();
+  loadProducts();
+});
+
+async function loadOrders() {
+  try {
+    const res = await adminFetch("/api/admin/orders");
+    allOrders = await res.json();
+    renderOrders(allOrders);
+    buildDashboard(allOrders);
+  } catch {
+    document.getElementById("ordersBody").innerHTML = `<tr><td colspan="7" class="loading">Failed to load orders.</td></tr>`;
+  }
+}
+
+function renderOrders(orders) {
+  document.getElementById("orderCount").textContent = "(" + orders.length + ")";
+  const tbody = document.getElementById("ordersBody");
+  if (!orders.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="loading">No orders found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = orders.map(o => {
+    const date = new Date(o.createdAt).toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"2-digit" });
+    const shortId = "#" + o._id.slice(-8).toUpperCase();
+    return `
+      <tr>
+        <td><span class="order-id">${shortId}</span></td>
+        <td>
+          <div style="font-weight:bold">${o.shipping?.name || "—"}</div>
+          <div class="customer-phone">${o.shipping?.phone || ""}</div>
+        </td>
+        <td style="font-weight:bold;color:#c49a2a">₹${o.amount}</td>
+        <td style="color:#888;font-size:13px">${date}</td>
+        <td><span class="badge ${o.status}">${o.status}</span></td>
+        <td>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <select class="status-select" id="sel-${o._id}">
+              <option ${o.status==="Paid"?"selected":""}>Paid</option>
+              <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
+              <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
+              <option ${o.status==="Cancelled"?"selected":""}>Cancelled</option>
+            </select>
+            <button class="update-btn" onclick="updateStatus('${o._id}')">Save</button>
+          </div>
+        </td>
+        <td>
+          <button class="expand-btn" onclick="toggleItems('${o._id}', this)">▼ View</button>
+        </td>
+      </tr>
+      <tr class="order-items-row" id="items-${o._id}">
+        <td colspan="7">
+          <div class="order-items-inner">
+            ${(o.items||[]).map(item => `
+              <div class="item-chip">
+                <img src="${item.image||'/logo.jpg'}" onerror="this.src='/logo.jpg'">
+                <div>
+                  <div class="item-chip-name">${item.name||"Product"}</div>
+                  <div class="item-chip-meta">Qty: ${item.qty||1} &middot; ₹${item.price||"—"}</div>
+                </div>
+              </div>
+            `).join("") || "<span style='color:#888'>No item details</span>"}
+            ${o.shipping?.address ? `
+            <div class="address-chip">
+              <div class="chip-label">Delivery Address</div>
+              <div>${o.shipping.address}, ${o.shipping.city}</div>
+              <div style="color:#888;font-size:12px">${o.shipping.state} — ${o.shipping.pincode}</div>
+            </div>` : ""}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function toggleItems(id, btn) {
+  const row = document.getElementById("items-" + id);
+  const open = row.classList.toggle("open");
+  btn.textContent = open ? "▲ Hide" : "▼ View";
+}
+
+async function updateStatus(id) {
+  const status = document.getElementById("sel-" + id).value;
+  try {
+    const res = await adminFetch(`/api/admin/orders/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+    const d = await res.json();
+    if (d.success) { showToast("Status updated to " + status); loadOrders(); }
+    else showToast("Update failed", true);
+  } catch { showToast("Error updating", true); }
+}
+
+function filterOrders() {
+  const q = document.getElementById("orderSearch").value.toLowerCase();
+  const s = document.getElementById("statusFilter").value;
+  const filtered = allOrders.filter(o => {
+    const matchStatus = !s || o.status === s;
+    const matchSearch = !q ||
+      o._id.toLowerCase().includes(q) ||
+      (o.shipping?.name || "").toLowerCase().includes(q) ||
+      (o.shipping?.phone || "").includes(q);
+    return matchStatus && matchSearch;
+  });
+  renderOrders(filtered);
+}
+
+function buildDashboard(orders) {
+  const today = new Date().toDateString();
+  const totalRevenue = orders.reduce((s, o) => s + (o.amount || 0), 0);
+  const todayCount = orders.filter(o => new Date(o.createdAt).toDateString() === today).length;
+  const unshipped = orders.filter(o => o.status === "Paid").length;
+
+  document.getElementById("statRevenue").textContent = "₹" + totalRevenue.toLocaleString("en-IN");
+  document.getElementById("statOrders").textContent = orders.length;
+  document.getElementById("statToday").textContent = todayCount;
+  document.getElementById("statPending").textContent = unshipped;
+
+  const map = {};
+  orders.forEach(o => (o.items||[]).forEach(item => {
+    const k = item.name || item.productId || "unknown";
+    if (!map[k]) map[k] = { name: item.name, image: item.image, qty: 0, rev: 0 };
+    map[k].qty += (item.qty || 1);
+    map[k].rev += (item.price || 0) * (item.qty || 1);
+  }));
+
+  const top = Object.values(map).sort((a, b) => b.rev - a.rev).slice(0, 8);
+  const tbody = document.getElementById("topProductsBody");
+
+  if (!top.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="loading">No order data yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = top.map((p, i) => `
+    <tr>
+      <td style="color:#ccc;font-weight:bold">${i + 1}</td>
+      <td><img src="${p.image||'/logo.jpg'}" onerror="this.src='/logo.jpg'">${p.name||"Unknown"}</td>
+      <td>${p.qty}</td>
+      <td style="font-weight:bold;color:#c49a2a">₹${p.rev.toLocaleString("en-IN")}</td>
+    </tr>
+  `).join("");
+}
+
+async function loadProducts() {
+  const list = document.getElementById("productList");
+  list.innerHTML = "<p>Loading...</p>";
+  try {
+    const res = await fetch("/api/products");
+    const products = await res.json();
+    document.getElementById("productCount").textContent = "(" + products.length + " products)";
+    if (!products.length) { list.innerHTML = "<p>No products added.</p>"; return; }
+    list.innerHTML = "";
+    products.forEach(p => {
+      const wrapper = document.createElement("div");
+      wrapper.style.marginBottom = "10px";
+      wrapper.innerHTML = `
+        <div class="product-card" style="flex-direction:column;align-items:stretch;gap:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;">
+              <img src="${p.image}" width="70" height="70" style="object-fit:cover;border-radius:6px;" onerror="this.src='/logo.jpg'">
+              <div style="margin-left:10px;">
+                <strong>${p.name}</strong><br>
+                Price: ₹${p.price}
+                ${p.old_price ? `<br><span style="color:#999;text-decoration:line-through;">₹${p.old_price}</span>` : ""}
+              </div>
+            </div>
+            <div>
+              <button class="edit-btn" onclick="toggleEditForm('${p._id}')">Edit</button>
+              <button class="delete-btn" onclick="deleteProduct('${p._id}')">Delete</button>
+            </div>
+          </div>
+          <div class="edit-form-row" id="edit-${p._id}">
+            <label>Product Name</label>
+            <input type="text" id="edit-name-${p._id}" value="${p.name}">
+            <label>Price (₹)</label>
+            <input type="number" id="edit-price-${p._id}" value="${p.price}">
+            <label>Old Price (₹)</label>
+            <input type="number" id="edit-oldprice-${p._id}" value="${p.old_price || ''}">
+            <label>Description</label>
+            <textarea id="edit-desc-${p._id}" rows="2">${p.description || ''}</textarea>
+            <label>New Image (optional — leave blank to keep current)</label>
+            <input type="file" id="edit-image-${p._id}" accept="image/*">
+            <div style="margin-top:4px;">
+              <button class="edit-save-btn" onclick="saveProduct('${p._id}')">Save Changes</button>
+              <button class="edit-cancel-btn" onclick="toggleEditForm('${p._id}')">Cancel</button>
+            </div>
+          </div>
+        </div>
+      `;
+      list.appendChild(wrapper);
+    });
+  } catch { list.innerHTML = "<p>Error loading products.</p>"; }
+}
+
+document.getElementById("addProductForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector("button[type=submit]");
+  btn.textContent = "Adding…"; btn.disabled = true;
+  try {
+    const res = await adminFetch("/api/products", { method: "POST", body: new FormData(e.target) });
+    const d = await res.json();
+    if (d.success) { showToast("Product added!"); e.target.reset(); loadProducts(); }
+    else showToast("Failed: " + (d.message || "error"), true);
+  } catch { showToast("Error adding product", true); }
+  finally { btn.textContent = "Add Product"; btn.disabled = false; }
+});
+
+function toggleEditForm(id) {
+  const form = document.getElementById("edit-" + id);
+  form.classList.toggle("open");
+}
+
+async function saveProduct(id) {
+  const name      = document.getElementById("edit-name-" + id).value.trim();
+  const price     = document.getElementById("edit-price-" + id).value;
+  const oldPrice  = document.getElementById("edit-oldprice-" + id).value;
+  const desc      = document.getElementById("edit-desc-" + id).value.trim();
+  const imageFile = document.getElementById("edit-image-" + id).files[0];
+
+  if (!name || !price) { showToast("Name and price are required", true); return; }
+
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("price", price);
+  if (oldPrice) formData.append("old_price", oldPrice);
+  if (desc) formData.append("description", desc);
+  if (imageFile) formData.append("image", imageFile);
+
+  try {
+    const res = await adminFetch(`/api/products/${id}`, { method: "PUT", body: formData });
+    const d = await res.json();
+    if (d.success) { showToast("Product updated!"); loadProducts(); }
+    else showToast("Update failed: " + (d.message || "error"), true);
+  } catch { showToast("Error updating product", true); }
+}
+
+async function deleteProduct(id) {
+  if (!confirm("Delete this product?")) return;
+  try {
+    const res = await adminFetch(`/api/products/${id}`, { method: "DELETE" });
+    const d = await res.json();
+    if (d.success) { showToast("Product deleted"); loadProducts(); }
+    else showToast("Delete failed", true);
+  } catch { showToast("Error", true); }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await fetch("/admin/api/logout", { method: "POST" }).catch(() => {});
+  localStorage.removeItem("adminToken");
+  window.location.href = "/login";
+});
+</script>
+</body>
+</html>
