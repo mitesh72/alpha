@@ -7,7 +7,8 @@ dotenv.config();
 
 const createAdmin = async () => {
     await mongoose.connect(process.env.MONGO_URI);
-
+console.log("Mongo URI exists:", !!process.env.MONGO_URI);
+console.log("MongoDB DB Name:", mongoose.connection.db.databaseName);
     const adminExists = await collection.findOne({ role: "admin" });
 
     if (adminExists) {

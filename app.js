@@ -316,7 +316,14 @@ const upload = multer({ storage });
 app.get("/api/products", async (req, res) => {
   res.json(await Product.find());
 });
+app.get("/api/products", async (req, res) => {
+  const count = await Product.countDocuments();
 
+  console.log("Product count:", count);
+  console.log("Database:", Product.db.name);
+
+  res.json(await Product.find());
+});
 app.get("/api/products/:id", async (req, res) => {
   res.json(await Product.findById(req.params.id));
 });

@@ -56,6 +56,8 @@ mongoose
         await Product.insertMany(formatted);
 
         console.log("All products inserted successfully!");
+        const count = await Product.countDocuments();
+console.log("Products in DB:", count);
         process.exit();
     })
     .catch((err) => console.error(err));
