@@ -6,9 +6,10 @@ import collection from "./config.js";
 dotenv.config();
 
 const createAdmin = async () => {
-    await mongoose.connect(process.env.MONGO_URI);
-console.log("Mongo URI exists:", !!process.env.MONGO_URI);
-console.log("MongoDB DB Name:", mongoose.connection.db.databaseName);
+    await mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("database connected"))
+  .catch((err) => console.log("database cannot be connected", err));
+
     const adminExists = await collection.findOne({ role: "admin" });
 
     if (adminExists) {
