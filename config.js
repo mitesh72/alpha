@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("database connected successfully"))
-  .catch(() => console.log("database cannot be connected"));
+ mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log("database connected"))
+    .catch((err) => console.log("database connection error:", err.message));
 
 const LoginSchema = new mongoose.Schema({
   name: {
