@@ -58,6 +58,8 @@ mongoose
         console.log("All products inserted successfully!");
         const count = await Product.countDocuments();
 console.log("Products in DB:", count);
+    console.log("Database:", mongoose.connection.db.databaseName);
         process.exit();
+    
     })
     .catch((err) => console.error(err));
