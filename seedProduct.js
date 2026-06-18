@@ -1,17 +1,20 @@
 // seedProducts.js
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 import Product from "./productModel.js";
 
+dotenv.config();
+
 const items = [
-    { id: '001', image: 'beardoil.jpg', product_name:'Beard Growth Oil', old_price: 699, new_price: 499 },
+    { id: '001', image: 'beardoil.jpg', product_name: 'Beard Growth Oil', old_price: 699, new_price: 499 },
     { id: '002', image: 'beardshinner.jpg', product_name: 'Beard Shinner', old_price: 559, new_price: 449 },
     { id: '003', image: 'faceserum.jpg', product_name: 'Face Serum', old_price: 669, new_price: 599 },
 ];
 
 const items2 = [
-    { id: '004', image: 'perfume1.jpg', product_name:'Dominant Perfume', old_price: 2499, new_price: 1399 },
-    { id: '005', image: 'perfume2.jpg', product_name:'Ellicit Man Perfume', old_price: 2499, new_price: 1199 },
-    { id: '006', image: 'perfume3.jpg', product_name:'More Men Perfume', old_price: 2499, new_price: 1099 },
+    { id: '004', image: 'perfume1.jpg', product_name: 'Dominant Perfume', old_price: 2499, new_price: 1399 },
+    { id: '005', image: 'perfume2.jpg', product_name: 'Ellicit Man Perfume', old_price: 2499, new_price: 1199 },
+    { id: '006', image: 'perfume3.jpg', product_name: 'More Men Perfume', old_price: 2499, new_price: 1099 },
 ];
 
 const items3 = [
@@ -32,7 +35,7 @@ const items4 = [
 const allProducts = [...items, ...items2, ...items3, ...items4];
 
 mongoose
-    .connect("mongodb://localhost:27017/userDetails")
+    .connect(process.env.MONGO_URI)
     .then(async () => {
         console.log("MongoDB connected!");
 
@@ -46,10 +49,8 @@ mongoose
             old_price: p.old_price || null,
             description: p.product_name,
 
-            // ✅ MULTIPLE IMAGES (for now 1 image, later you can add more)
-            images: [
-                "/uploads/" + p.image
-            ]
+            // ✅ matches productModel.js schema (single 'image' field)
+            image: "/uploads/" + p.image
         }));
 
         await Product.insertMany(formatted);

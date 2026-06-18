@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import dotenv from "dotenv";
 import collection from "./config.js";
 
+dotenv.config();
+
 const createAdmin = async () => {
-    await mongoose.connect("mongodb://localhost:27017/userDetails");
+    await mongoose.connect(process.env.MONGO_URI);
 
     const adminExists = await collection.findOne({ role: "admin" });
 
